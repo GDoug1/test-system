@@ -66,14 +66,16 @@ function AnnouncementCard({ announcements }) {
   );
 }
 
-function BreakCard() {
+function BreakCard({ onBreakClick, breakStarted = false }) {
   return (
     <div className="card break-card">
       <div className="card-top compact">
         <span>Break</span>
         <span className="toggle-wrap">Auto-Stop <span className="toggle-dot">●</span></span>
       </div>
-      <button type="button" className="start-btn">Start</button>
+      <button type="button" className="start-btn" onClick={onBreakClick}>
+        {breakStarted ? 'End Break' : 'Start'}
+      </button>
     </div>
   );
 }

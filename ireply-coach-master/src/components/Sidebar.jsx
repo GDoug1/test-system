@@ -1,4 +1,4 @@
-function Sidebar({ logo }) {
+function Sidebar({ logo, onLogoutClick }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
@@ -20,7 +20,7 @@ function Sidebar({ logo }) {
         </nav>
       </div>
 
-      <button type="button" className="logout-btn">Log Out</button>
+      <button type="button" className="logout-btn" onClick={onLogoutClick}>Log Out</button>
     </aside>
   );
 }

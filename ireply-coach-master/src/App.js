@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import './styles/App.css';
 import logo from './ireply-logo.png';
 import Sidebar from './components/Sidebar';
+import ConfirmationModal from './components/ConfirmationModal';
 import {
   AnnouncementCard,
   BreakCard,
@@ -30,6 +31,13 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [memberStatuses, setMemberStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: null
+  });
+  const [breakStarted, setBreakStarted] = useState(false);
 
   // Fetch user data
   useEffect(() => {
@@ -137,64 +145,155 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Handle Time In/Out
-  const handleToggleTimeIn = async () => {
-    if (!timeInStart) {
-      // Time In
-      setTimeInStart(new Date());
-      try {
-        const response = await fetch(`${API_BASE_URL}/time_in_out.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: CURRENT_USER_ID,
-            employee_id: CURRENT_EMPLOYEE_ID,
-            action: 'time_in',
-            timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
-          })
-        });
-        const result = await response.json();
-        console.log('[v0] Time In response:', result);
-        if (result.status !== 'success') {
-          console.error('Time In error:', result.message);
-          alert(`Error: ${result.message}`);
-        }
-      } catch (error) {
-        console.error('[v0] Error recording time in:', error);
-        alert(`Network error: ${error.message}`);
+  // Handle Time In/Out with confirmation
+  const handleTimeInClick = () => {
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Confirm Time In',
+      message: 'Are you sure you want to Time In?',
+      action: 'time_in'
+    });
+  };
+
+  const handleTimeOutClick = () => {
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Confirm Time Out',
+      message: 'Are you sure you want to Time Out?',
+      action: 'time_out'
+    });
+  };
+
+  const executeTimeIn = async () => {
+    setTimeInStart(new Date());
+    try {
+      const response = await fetch(`${API_BASE_URL}/time_in_out.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: CURRENT_USER_ID,
+          employee_id: CURRENT_EMPLOYEE_ID,
+          action: 'time_in',
+          timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        })
+      });
+      const result = await response.json();
+      console.log('[v0] Time In response:', result);
+      if (result.status !== 'success') {
+        console.error('Time In error:', result.message);
+        alert(`Error: ${result.message}`);
       }
-    } else {
-      // Time Out
-      try {
-        const response = await fetch(`${API_BASE_URL}/time_in_out.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: CURRENT_USER_ID,
-            employee_id: CURRENT_EMPLOYEE_ID,
-            action: 'time_out',
-            timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
-          })
-        });
-        const result = await response.json();
-        console.log('[v0] Time Out response:', result);
-        if (result.status === 'success') {
-          setTimeInStart(null);
-          // Refresh today's log
-          const logResponse = await fetch(`${API_BASE_URL}/get_todays_log.php?employee_id=${CURRENT_EMPLOYEE_ID}`);
-          const logResult = await logResponse.json();
-          if (logResult.status === 'success') {
-            setTodaysLog(logResult.data);
-          }
-        } else {
-          console.error('Time Out error:', result.message);
-          alert(`Error: ${result.message}`);
-        }
-      } catch (error) {
-        console.error('[v0] Error recording time out:', error);
-        alert(`Network error: ${error.message}`);
-      }
+    } catch (error) {
+      console.error('[v0] Error recording time in:', error);
+      alert(`Network error: ${error.message}`);
     }
+  };
+
+  const executeTimeOut = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/time_in_out.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: CURRENT_USER_ID,
+          employee_id: CURRENT_EMPLOYEE_ID,
+          action: 'time_out',
+          timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        })
+      });
+      const result = await response.json();
+      console.log('[v0] Time Out response:', result);
+      if (result.status === 'success') {
+        setTimeInStart(null);
+        // Refresh today's log
+        const logResponse = await fetch(`${API_BASE_URL}/get_todays_log.php?employee_id=${CURRENT_EMPLOYEE_ID}`);
+        const logResult = await logResponse.json();
+        if (logResult.status === 'success') {
+          setTodaysLog(logResult.data);
+        }
+      } else {
+        console.error('Time Out error:', result.message);
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('[v0] Error recording time out:', error);
+      alert(`Network error: ${error.message}`);
+    }
+  };
+
+  const handleToggleTimeIn = () => {
+    if (!timeInStart) {
+      handleTimeInClick();
+    } else {
+      handleTimeOutClick();
+    }
+  };
+
+  const handleModalConfirm = () => {
+    if (confirmationModal.action === 'time_in') {
+      executeTimeIn();
+    } else if (confirmationModal.action === 'time_out') {
+      executeTimeOut();
+    } else if (confirmationModal.action === 'start_break' || confirmationModal.action === 'end_break') {
+      executeBreak(confirmationModal.action);
+    } else if (confirmationModal.action === 'logout') {
+      executeLogout();
+    }
+    setConfirmationModal({ ...confirmationModal, isOpen: false });
+  };
+
+  const handleModalCancel = () => {
+    setConfirmationModal({ ...confirmationModal, isOpen: false });
+  };
+
+  const handleBreakClick = () => {
+    const action = breakStarted ? 'end_break' : 'start_break';
+    const title = breakStarted ? 'Confirm End Break' : 'Confirm Start Break';
+    const message = breakStarted ? 'Are you sure you want to end your break?' : 'Are you sure you want to start a break?';
+    
+    setConfirmationModal({
+      isOpen: true,
+      title,
+      message,
+      action
+    });
+  };
+
+  const executeBreak = async (action) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${action}.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: CURRENT_USER_ID,
+          employee_id: CURRENT_EMPLOYEE_ID,
+          timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setBreakStarted(action === 'start_break');
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error(`Error with ${action}:`, error);
+      alert(`Network error: ${error.message}`);
+    }
+  };
+
+  const handleLogoutClick = () => {
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Confirm Logout',
+      message: 'Are you sure you want to log out?',
+      action: 'logout'
+    });
+  };
+
+  const executeLogout = () => {
+    // Redirect to login page or clear session
+    window.location.href = '/login';
   };
 
   // Format time display
@@ -286,7 +385,16 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar logo={logo} />
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title={confirmationModal.title}
+        message={confirmationModal.message}
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
+        confirmText="Yes"
+        cancelText="No"
+      />
+      <Sidebar logo={logo} onLogoutClick={handleLogoutClick} />
 
       <main className="content">
         <DashboardHeader headerTime={headerTime} headerDate={headerDate} />
@@ -301,7 +409,7 @@ function App() {
             onToggleTimeIn={handleToggleTimeIn}
           />
           <AnnouncementCard announcements={announcements} />
-          <BreakCard />
+          <BreakCard onBreakClick={handleBreakClick} breakStarted={breakStarted} />
           <ShiftCard schedule={schedule} />
           <CalendarCard calendarData={calendarData} />
           <HolidayCard holidayBirthdayItems={holidays} />
