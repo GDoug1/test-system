@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import './styles/App.css';
 import logo from './ireply-logo.png';
 import Sidebar from './components/Sidebar';
-import DashboardHeader from './components/DashboardHeader';
-import TimeCard from './components/TimeCard';
-import AnnouncementCard from './components/AnnouncementCard';
-import BreakCard from './components/BreakCard';
-import ShiftCard from './components/ShiftCard';
-import CalendarCard from './components/CalendarCard';
-import HolidayCard from './components/HolidayCard';
-import SummaryCard from './components/SummaryCard';
-import MemberStatusCard from './components/MemberStatusCard';
+import {
+  AnnouncementCard,
+  BreakCard,
+  CalendarCard,
+  DashboardHeader,
+  HolidayCard,
+  MemberStatusCard,
+  ShiftCard,
+  SummaryCard,
+  TimeCard,
+} from './components/DashboardComponents';
 
 const API_BASE_URL = 'http://localhost/timelogger/api';
 const CURRENT_USER_ID = 1; // tester1
