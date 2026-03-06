@@ -1,0 +1,38 @@
+.break-card {
+  grid-area: break;
+  height: 82px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.card-top.compact {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.toggle-dot {
+  font-size: 15px;
+}
+
+.start-btn {
+  display: block;
+  margin: 0 auto;
+  border: none;
+  border-radius: 8px;
+  width: 115px;
+  height: 30px;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
