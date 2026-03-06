@@ -1,5 +1,3 @@
-import '../styles/Sidebar.css';
-
 function Sidebar({ logo }) {
   return (
     <aside className="sidebar">
