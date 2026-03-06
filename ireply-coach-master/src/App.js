@@ -37,7 +37,6 @@ function App() {
     message: '',
     action: null
   });
-  const [breakStarted, setBreakStarted] = useState(false);
 
   // Fetch user data
   useEffect(() => {
@@ -145,25 +144,7 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Handle Time In/Out with confirmation
-  const handleTimeInClick = () => {
-    setConfirmationModal({
-      isOpen: true,
-      title: 'Confirm Time In',
-      message: 'Are you sure you want to Time In?',
-      action: 'time_in'
-    });
-  };
-
-  const handleTimeOutClick = () => {
-    setConfirmationModal({
-      isOpen: true,
-      title: 'Confirm Time Out',
-      message: 'Are you sure you want to Time Out?',
-      action: 'time_out'
-    });
-  };
-
+  // Handle Time In (no confirmation)
   const executeTimeIn = async () => {
     setTimeInStart(new Date());
     try {
@@ -187,6 +168,16 @@ function App() {
       console.error('[v0] Error recording time in:', error);
       alert(`Network error: ${error.message}`);
     }
+  };
+
+  // Handle Time Out with confirmation
+  const handleTimeOutClick = () => {
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Confirm Time Out',
+      message: 'Are you sure you want to Time Out?',
+      action: 'time_out'
+    });
   };
 
   const executeTimeOut = async () => {
@@ -223,19 +214,15 @@ function App() {
 
   const handleToggleTimeIn = () => {
     if (!timeInStart) {
-      handleTimeInClick();
+      executeTimeIn();
     } else {
       handleTimeOutClick();
     }
   };
 
   const handleModalConfirm = () => {
-    if (confirmationModal.action === 'time_in') {
-      executeTimeIn();
-    } else if (confirmationModal.action === 'time_out') {
+    if (confirmationModal.action === 'time_out') {
       executeTimeOut();
-    } else if (confirmationModal.action === 'start_break' || confirmationModal.action === 'end_break') {
-      executeBreak(confirmationModal.action);
     } else if (confirmationModal.action === 'logout') {
       executeLogout();
     }
@@ -246,41 +233,7 @@ function App() {
     setConfirmationModal({ ...confirmationModal, isOpen: false });
   };
 
-  const handleBreakClick = () => {
-    const action = breakStarted ? 'end_break' : 'start_break';
-    const title = breakStarted ? 'Confirm End Break' : 'Confirm Start Break';
-    const message = breakStarted ? 'Are you sure you want to end your break?' : 'Are you sure you want to start a break?';
-    
-    setConfirmationModal({
-      isOpen: true,
-      title,
-      message,
-      action
-    });
-  };
 
-  const executeBreak = async (action) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${action}.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: CURRENT_USER_ID,
-          employee_id: CURRENT_EMPLOYEE_ID,
-          timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
-        })
-      });
-      const result = await response.json();
-      if (result.status === 'success') {
-        setBreakStarted(action === 'start_break');
-      } else {
-        alert(`Error: ${result.message}`);
-      }
-    } catch (error) {
-      console.error(`Error with ${action}:`, error);
-      alert(`Network error: ${error.message}`);
-    }
-  };
 
   const handleLogoutClick = () => {
     setConfirmationModal({
@@ -292,7 +245,8 @@ function App() {
   };
 
   const executeLogout = () => {
-    // Redirect to login page or clear session
+    // Clear session and redirect to login page
+    localStorage.clear();
     window.location.href = '/login';
   };
 
@@ -409,7 +363,7 @@ function App() {
             onToggleTimeIn={handleToggleTimeIn}
           />
           <AnnouncementCard announcements={announcements} />
-          <BreakCard onBreakClick={handleBreakClick} breakStarted={breakStarted} />
+          <BreakCard />
           <ShiftCard schedule={schedule} />
           <CalendarCard calendarData={calendarData} />
           <HolidayCard holidayBirthdayItems={holidays} />
@@ -427,3 +381,4 @@ function App() {
 }
 
 export default App;
+  

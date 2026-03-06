@@ -35,7 +35,12 @@ function TimeCard({
         <div className="time-input">{timeInputDisplay}</div>
         <div className="time-counter">{counterDisplay}</div>
 
-        <button type="button" className="time-in-btn" onClick={onToggleTimeIn}>
+        <button 
+          type="button" 
+          className="time-in-btn" 
+          onClick={onToggleTimeIn}
+          disabled={timeInStart && !timeInStart ? false : timeInStart ? false : false}
+        >
           {timeInStart ? 'Time Out' : 'Time In'}
         </button>
       </div>
@@ -66,16 +71,13 @@ function AnnouncementCard({ announcements }) {
   );
 }
 
-function BreakCard({ onBreakClick, breakStarted = false }) {
+function BreakCard() {
   return (
     <div className="card break-card">
       <div className="card-top compact">
         <span>Break</span>
         <span className="toggle-wrap">Auto-Stop <span className="toggle-dot">●</span></span>
       </div>
-      <button type="button" className="start-btn" onClick={onBreakClick}>
-        {breakStarted ? 'End Break' : 'Start'}
-      </button>
     </div>
   );
 }
@@ -128,17 +130,21 @@ function HolidayCard({ holidayBirthdayItems }) {
   return (
     <div className="card holiday-card">
       <div className="card-top">
-        <span>Holidays/Birthday</span>
+        <span>Holidays</span>
         <span className="plus">+</span>
       </div>
       <ul className="list-items holiday-list">
-        {holidayBirthdayItems.map((item) => (
-          <li key={`${item.kind}-${item.label}`} className="holiday-item">
-            <span className={`holiday-kind ${item.kind.toLowerCase()}`}>{item.kind}</span>
-            <span className="holiday-label">{item.label}</span>
-            <span className="holiday-date">{item.date}</span>
-          </li>
-        ))}
+        {holidayBirthdayItems && Array.isArray(holidayBirthdayItems) && holidayBirthdayItems.length > 0 ? (
+          holidayBirthdayItems.map((item) => (
+            <li key={`${item.kind}-${item.label}`} className="holiday-item">
+              <span className={`holiday-kind ${item.kind.toLowerCase()}`}>{item.kind}</span>
+              <span className="holiday-label">{item.label}</span>
+              <span className="holiday-date">{item.date}</span>
+            </li>
+          ))
+        ) : (
+          <li className="holiday-item" style={{ color: '#999' }}>No holidays this month</li>
+        )}
       </ul>
       <div className="mini-actions">✎&nbsp;&nbsp;◷</div>
     </div>

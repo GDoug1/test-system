@@ -455,7 +455,27 @@
   margin-bottom: 0;
   max-height: 145px;
   overflow-y: auto;
-  padding-right: 2px;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #999 #e8e8e8;
+}
+
+.holiday-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.holiday-list::-webkit-scrollbar-track {
+  background: #e8e8e8;
+  border-radius: 3px;
+}
+
+.holiday-list::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 3px;
+}
+
+.holiday-list::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
 
 .holiday-item {
