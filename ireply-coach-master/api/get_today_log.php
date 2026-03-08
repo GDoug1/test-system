@@ -14,7 +14,7 @@ SELECT
     tl.time_log_id,
     tl.time_in,
     tl.time_out,
-    tl.total_hours,
+    tl.total_hours, 
     al.attendance_status,
     e.first_name,
     e.last_name

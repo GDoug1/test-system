@@ -31,6 +31,7 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [memberStatuses, setMemberStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState('team_coach'); // 'team_coach' or 'employee'
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
     title: '',
@@ -348,7 +349,12 @@ function App() {
         confirmText="Yes"
         cancelText="No"
       />
-      <Sidebar logo={logo} onLogoutClick={handleLogoutClick} />
+      <Sidebar 
+        logo={logo} 
+        onLogoutClick={handleLogoutClick}
+        userRole={userRole}
+        onRoleChange={setUserRole}
+      />
 
       <main className="content">
         <DashboardHeader headerTime={headerTime} headerDate={headerDate} />
@@ -368,12 +374,14 @@ function App() {
           <CalendarCard calendarData={calendarData} />
           <HolidayCard holidayBirthdayItems={holidays} />
           <SummaryCard timeInStart={timeInStart} totalHours={totalHours} />
-          <MemberStatusCard
-            memberStatuses={memberStatuses}
-            memberRequests={memberRequests}
-            getStatusDotClass={getStatusDotClass}
-            timeInStart={timeInStart}
-          />
+          {userRole === 'team_coach' && (
+            <MemberStatusCard
+              memberStatuses={memberStatuses}
+              memberRequests={memberRequests}
+              getStatusDotClass={getStatusDotClass}
+              timeInStart={timeInStart}
+            />
+          )}
         </section>
       </main>
     </div>
